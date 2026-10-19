@@ -1,217 +1,610 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b1014" />
-    <meta name="description" content="A personal countdown to my bond end date." />
-    <title>Bond Countdown — The Finish Line</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg: #0b1014;
-        --panel: rgba(20, 29, 35, .82);
-        --panel-2: #141e24;
-        --text: #edf5f2;
-        --muted: #91a39f;
-        --green: #9cf2c3;
-        --green-2: #42c98b;
-        --line: rgba(180, 211, 200, .13);
-        --amber: #f2c879;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0; min-height: 100vh; color: var(--text);
-        background:
-          radial-gradient(ellipse at 12% 0%, rgba(43, 128, 94, .18), transparent 34rem),
-          radial-gradient(ellipse at 100% 80%, rgba(40, 91, 91, .12), transparent 32rem),
-          var(--bg);
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      }
-      .shell { width: min(1040px, calc(100% - 36px)); margin: 0 auto; padding: 34px 0 28px; }
-      header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 48px; }
-      .brand { display: flex; gap: 12px; align-items: center; font-weight: 700; letter-spacing: -.03em; }
-      .brand-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; color: #092017; background: var(--green); font-size: 20px; }
-      .eyebrow { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
-      .local-date { color: var(--muted); font-size: 12px; text-align: right; }
-      .hero { text-align: center; margin-bottom: 30px; }
-      .hero h1 { margin: 13px 0 12px; font-size: clamp(36px, 6vw, 66px); line-height: 1.02; letter-spacing: -.065em; }
-      .hero h1 span { color: var(--green); }
-      .hero p { margin: 0 auto; max-width: 550px; color: var(--muted); line-height: 1.7; font-size: 15px; }
-      .date-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 999px; padding: 9px 14px; color: #dbe8e2; font-size: 13px; }
-      .date-pill b { color: var(--green); font-weight: 700; }
-      .main-card { border: 1px solid var(--line); border-radius: 25px; padding: clamp(20px, 4vw, 36px); background: linear-gradient(145deg, rgba(23,35,40,.94), rgba(14,21,26,.94)); box-shadow: 0 24px 90px rgba(0,0,0,.23); }
-      .card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 25px; }
-      .card-top h2 { font-size: 14px; margin: 0; color: #d6e4df; font-weight: 650; }
-      .live { display: inline-flex; gap: 7px; align-items: center; color: var(--green); font-size: 11px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-      .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-2); box-shadow: 0 0 12px var(--green-2); }
-      .timer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-      .time-unit { text-align: center; border: 1px solid var(--line); background: rgba(4,10,13,.32); border-radius: 17px; padding: 23px 8px 19px; min-width: 0; }
-      .number { display: block; font-size: clamp(34px, 6vw, 58px); line-height: 1; font-weight: 750; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
-      .unit-label { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .17em; margin-top: 13px; }
-      .stats { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 13px; margin-top: 16px; }
-      .stat { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: var(--panel); }
-      .stat-label { color: var(--muted); font-size: 12px; display: flex; gap: 8px; align-items: center; }
-      .stat-value { margin-top: 14px; font-size: clamp(25px, 4vw, 37px); font-weight: 750; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
-      .stat-value.green { color: var(--green); }
-      .stat-note { margin-top: 7px; font-size: 11px; line-height: 1.5; color: var(--muted); }
-      .progress-wrap { margin-top: 23px; border: 1px solid var(--line); border-radius: 18px; padding: 19px 21px; background: rgba(10,17,20,.45); }
-      .progress-heading { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; margin-bottom: 13px; }
-      .progress-heading span:first-child { color: #dbe7e2; }
-      .progress-heading span:last-child { color: var(--green); font-weight: 700; }
-      .track { height: 7px; background: #27342f; border-radius: 99px; overflow: hidden; }
-      .bar { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, #45c68a, #b2ffd1); transition: width .4s ease; }
-      .progress-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; color: var(--muted); font-size: 11px; }
-      .quote { margin: 25px 0 0; padding: 0 10px; text-align: center; color: #c4d3cd; font-size: 14px; line-height: 1.7; }
-      .quote strong { color: var(--green); font-weight: 650; }
-      footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 28px; color: #687b75; font-size: 11px; }
-      .foot-right { text-align: right; }
-      @media (max-width: 650px) {
-        .shell { width: min(100% - 24px, 540px); padding-top: 22px; }
-        header { margin-bottom: 38px; }
-        .local-date { max-width: 125px; line-height: 1.5; }
-        .hero p { font-size: 14px; }
-        .timer { gap: 7px; }
-        .time-unit { padding: 18px 3px 15px; border-radius: 13px; }
-        .unit-label { font-size: 8px; letter-spacing: .1em; }
-        .stats { grid-template-columns: 1fr 1fr; }
-        .stat:first-child { grid-column: 1 / -1; }
-        .stat { padding: 17px; }
-        footer { align-items: flex-start; line-height: 1.6; }
-      }
-      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
-    </style>
-  </head>
-  <body>
-    <div class="shell">
-      <header>
-        <div class="brand"><div class="brand-mark">↗</div><div>Bond Countdown</div></div>
-        <div class="local-date" id="today-label">YOUR COUNTDOWN · LOCAL TIME</div>
-      </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1014" />
+  <title>Bond Countdown | Jugal, Neha & OM</title>
 
-      <section class="hero">
-        <div class="eyebrow">One day closer, every day</div>
-        <h1>The finish line<br /><span>is in sight.</span></h1>
-        <p>Keep your eyes on the next chapter. Your bond end date is set, and every weekday brings you closer.</p>
-        <div class="date-pill">✦ &nbsp; Bond ends <b>Wednesday, 8 September 2027</b></div>
-      </section>
+  <style>
+    :root {
+      --bg: #0b1014;
+      --card: #141e24;
+      --text: #edf5f2;
+      --muted: #91a39f;
+      --green: #9cf2c3;
+      --line: rgba(180, 211, 200, 0.13);
+    }
 
-      <main class="main-card">
-        <div class="card-top">
-          <h2>Time until your bond ends</h2>
-          <div class="live"><span class="dot"></span> Live countdown</div>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 10% 0%, #2b805e30, transparent 35rem),
+        radial-gradient(ellipse at 100% 80%, #285b5b20, transparent 30rem),
+        var(--bg);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 32px));
+      margin: auto;
+      padding: 30px 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 50px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 750;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      color: #092017;
+      background: var(--green);
+      font-size: 22px;
+    }
+
+    .today {
+      text-align: right;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 15px 0;
+      font-size: clamp(38px, 7vw, 68px);
+      line-height: 1.04;
+      letter-spacing: -0.065em;
+    }
+
+    h1 span {
+      color: var(--green);
+    }
+
+    .intro {
+      max-width: 560px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .deadline {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      font-size: 13px;
+      background: #ffffff08;
+    }
+
+    .deadline strong {
+      color: var(--green);
+    }
+
+    .team {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #172328, #0e151a);
+      box-shadow: 0 20px 60px #0002;
+    }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 26px;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      color: var(--green);
+      background: #9cf2c31e;
+      border: 1px solid #9cf2c32e;
+      font-weight: 850;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .joining {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .ends {
+      margin-top: 2px;
+      color: var(--green);
+      font-size: 11px;
+    }
+
+    .your-tag {
+      margin-left: auto;
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .count {
+      margin: 12px 0 5px;
+      font-size: clamp(30px, 4vw, 45px);
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .count-label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 23px;
+    }
+
+    .stat {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #0002;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .stat-value {
+      margin-top: 8px;
+      font-size: 22px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress {
+      margin-top: 21px;
+    }
+
+    .progress-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 9px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .progress-heading span:last-child {
+      color: var(--green);
+      font-weight: 750;
+    }
+
+    .track {
+      height: 6px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #27342f;
+    }
+
+    .bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #45c68a, #b2ffd1);
+      transition: width 0.4s ease;
+    }
+
+    .note {
+      max-width: 700px;
+      margin: 20px auto;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .quote {
+      margin-top: 32px;
+      color: #c4d3cd;
+      font-size: 14px;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .quote strong {
+      color: var(--green);
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 30px;
+      color: #687b75;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    footer span:last-child {
+      text-align: right;
+    }
+
+    @media (max-width: 850px) {
+      .team {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .count {
+        font-size: 44px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: calc(100% - 22px);
+        padding-top: 20px;
+      }
+
+      header {
+        margin-bottom: 38px;
+      }
+
+      .today {
+        max-width: 135px;
+        line-height: 1.6;
+      }
+
+      footer {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <div class="brand">
+        <div class="logo">↗</div>
+        Bond Countdown
+      </div>
+      <div class="today" id="today">TODAY</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">One day closer, every day</div>
+
+      <h1>
+        Three journeys.<br />
+        <span>Three finish lines.</span>
+      </h1>
+
+      <p class="intro">
+        Three countdowns, each ending on its own joining
+        anniversary. Keep track of your progress and look
+        forward to the next chapter.
+      </p>
+
+      <div class="deadline">
+        Each bond ends on the <strong>same date, one year later</strong>
+      </div>
+    </section>
+
+    <main class="team">
+
+      <!-- JUGAL -->
+      <article class="card">
+        <div class="person">
+          <div class="avatar">J</div>
+          <div>
+            <div class="name">Jugal</div>
+            <div class="joining">Joined 8 September 2026</div>
+            <div class="ends">Ends 8 September 2027</div>
+          </div>
+          <div class="your-tag">You</div>
         </div>
-        <div class="timer" aria-label="Live countdown">
-          <div class="time-unit"><span class="number" id="days">---</span><span class="unit-label">Days</span></div>
-          <div class="time-unit"><span class="number" id="hours">--</span><span class="unit-label">Hours</span></div>
-          <div class="time-unit"><span class="number" id="minutes">--</span><span class="unit-label">Minutes</span></div>
-          <div class="time-unit"><span class="number" id="seconds">--</span><span class="unit-label">Seconds</span></div>
-        </div>
+
+        <div class="eyebrow">Time to go</div>
+        <div class="count" id="jugal-days">---</div>
+        <div class="count-label">calendar days remaining</div>
+
         <div class="stats">
           <div class="stat">
-            <div class="stat-label">▦ &nbsp; Weekdays remaining</div>
-            <div class="stat-value green" id="weekdays">---</div>
-            <div class="stat-note">Monday to Friday · excludes today, includes the end date if it is a weekday</div>
+            <div class="stat-label">Weekdays left</div>
+            <div class="stat-value" id="jugal-weekdays">---</div>
           </div>
           <div class="stat">
-            <div class="stat-label">◷ &nbsp; Calendar days</div>
-            <div class="stat-value" id="calendar-days">---</div>
-            <div class="stat-note">Every day until the finish line</div>
+            <div class="stat-label">Weekends left</div>
+            <div class="stat-value" id="jugal-weekends">---</div>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progress-heading">
+            <span>Bond timeline</span>
+            <span id="jugal-percent">0%</span>
+          </div>
+          <div class="track">
+            <div class="bar" id="jugal-bar"></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- NEHA -->
+      <article class="card">
+        <div class="person">
+          <div class="avatar">N</div>
+          <div>
+            <div class="name">Neha</div>
+            <div class="joining">Joined 16 October 2026</div>
+            <div class="ends">Ends 16 October 2027</div>
+          </div>
+        </div>
+
+        <div class="eyebrow">Time to go</div>
+        <div class="count" id="neha-days">---</div>
+        <div class="count-label">calendar days remaining</div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Weekdays left</div>
+            <div class="stat-value" id="neha-weekdays">---</div>
           </div>
           <div class="stat">
-            <div class="stat-label">⌁ &nbsp; Weekends left</div>
-            <div class="stat-value" id="weekends">---</div>
-            <div class="stat-note">Saturdays and Sundays remaining</div>
+            <div class="stat-label">Weekends left</div>
+            <div class="stat-value" id="neha-weekends">---</div>
           </div>
         </div>
-        <div class="progress-wrap">
-          <div class="progress-heading"><span>Your journey to the finish line</span><span id="progress-label">Calculating…</span></div>
-          <div class="track"><div class="bar" id="progress-bar"></div></div>
-          <div class="progress-foot"><span>Today</span><span id="end-label">8 Sep 2027</span></div>
+
+        <div class="progress">
+          <div class="progress-heading">
+            <span>Bond timeline</span>
+            <span id="neha-percent">0%</span>
+          </div>
+          <div class="track">
+            <div class="bar" id="neha-bar"></div>
+          </div>
         </div>
-      </main>
-      <p class="quote">“You don't have to see the whole staircase. Just take the next step.”<br /><strong>Keep going. Your next chapter is waiting.</strong></p>
-      <footer><span>Made for the next chapter.</span><span class="foot-right">Calculations use your device's local date and time.<br />Public holidays are not deducted.</span></footer>
-    </div>
+      </article>
 
-    <script>
-      // Change this date if your bond end date changes. Month is zero-based: 8 = September.
-      const END_DATE = new Date(2027, 8, 8, 23, 59, 59, 999);
+      <!-- OM -->
+      <article class="card">
+        <div class="person">
+          <div class="avatar">O</div>
+          <div>
+            <div class="name">OM</div>
+            <div class="joining">Joined 22 September 2026</div>
+            <div class="ends">Ends 22 September 2027</div>
+          </div>
+        </div>
 
-      const $ = (id) => document.getElementById(id);
-      const pad = (n) => String(n).padStart(2, "0");
+        <div class="eyebrow">Time to go</div>
+        <div class="count" id="om-days">---</div>
+        <div class="count-label">calendar days remaining</div>
 
-      function startOfDay(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Weekdays left</div>
+            <div class="stat-value" id="om-weekdays">---</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Weekends left</div>
+            <div class="stat-value" id="om-weekends">---</div>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progress-heading">
+            <span>Bond timeline</span>
+            <span id="om-percent">0%</span>
+          </div>
+          <div class="track">
+            <div class="bar" id="om-bar"></div>
+          </div>
+        </div>
+      </article>
+
+    </main>
+
+    <p class="note">
+      Weekdays are Monday to Friday. Today is excluded, and the
+      final date is included if it falls on a weekday.
+      Public holidays are not deducted.
+    </p>
+
+    <p class="quote">
+      "You don't have to see the whole staircase. Just take the next step."
+      <br />
+      <strong>Keep going. Your next chapter is waiting.</strong>
+    </p>
+
+    <footer>
+      <span>Made for the next chapter.</span>
+      <span>
+        Uses your device's local date.<br />
+        Public holidays are not deducted.
+      </span>
+    </footer>
+
+  </div>
+
+  <script>
+    // Each person's bond ends on their joining date in 2027.
+    // JavaScript months start at zero: September = 8, October = 9.
+    const PEOPLE = [
+      {
+        id: "jugal",
+        joiningDate: new Date(2026, 8, 8),
+        endDate: new Date(2027, 8, 8)
+      },
+      {
+        id: "neha",
+        joiningDate: new Date(2026, 9, 16),
+        endDate: new Date(2027, 9, 16)
+      },
+      {
+        id: "om",
+        joiningDate: new Date(2026, 8, 22),
+        endDate: new Date(2027, 8, 22)
       }
+    ];
 
-      function calculateWeekdays(today, endDay) {
-        // Start tomorrow; count the end date if it falls Monday-Friday.
-        let count = 0;
-        const cursor = new Date(today);
-        cursor.setDate(cursor.getDate() + 1);
-        while (cursor <= endDay) {
-          const day = cursor.getDay();
-          if (day !== 0 && day !== 6) count++;
-          cursor.setDate(cursor.getDate() + 1);
+    const $ = (id) => document.getElementById(id);
+
+    function startOfDay(date) {
+      return new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+    }
+
+    // Count weekdays or weekends from tomorrow through the end date.
+    function countDays(today, endDate, countWeekends) {
+      let total = 0;
+      const date = new Date(today);
+
+      date.setDate(date.getDate() + 1);
+
+      while (date <= endDate) {
+        const day = date.getDay();
+        const isWeekend = day === 0 || day === 6;
+
+        if (isWeekend === countWeekends) {
+          total++;
         }
-        return count;
+
+        date.setDate(date.getDate() + 1);
       }
 
-      function calculateWeekends(today, endDay) {
-        let count = 0;
-        const cursor = new Date(today);
-        cursor.setDate(cursor.getDate() + 1);
-        while (cursor <= endDay) {
-          const day = cursor.getDay();
-          if (day === 0 || day === 6) count++;
-          cursor.setDate(cursor.getDate() + 1);
-        }
-        return count;
-      }
+      return total;
+    }
 
-      function updateCountdown() {
-        const now = new Date();
-        const today = startOfDay(now);
-        const endDay = startOfDay(END_DATE);
-        const diff = Math.max(0, END_DATE.getTime() - now.getTime());
-        const totalSeconds = Math.floor(diff / 1000);
-        const days = Math.floor(totalSeconds / 86400);
-        const hours = Math.floor((totalSeconds % 86400) / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        const calendarDays = Math.max(0, Math.ceil((endDay - today) / 86400000));
-        const weekdays = today >= endDay ? 0 : calculateWeekdays(today, endDay);
-        const weekends = today >= endDay ? 0 : calculateWeekends(today, endDay);
+    function updateCountdowns() {
+      const now = new Date();
+      const today = startOfDay(now);
 
-        $("days").textContent = String(days);
-        $("hours").textContent = pad(hours);
-        $("minutes").textContent = pad(minutes);
-        $("seconds").textContent = pad(seconds);
-        $("weekdays").textContent = weekdays.toLocaleString();
-        $("calendar-days").textContent = calendarDays.toLocaleString();
-        $("weekends").textContent = weekends.toLocaleString();
-        $("today-label").textContent = "TODAY · " + now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" }).toUpperCase();
+      $("today").textContent =
+        "TODAY · " +
+        now.toLocaleDateString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        }).toUpperCase();
 
-        const start = new Date(2026, 9, 16);
-        const totalJourney = END_DATE.getTime() - start.getTime();
-        const elapsed = Math.min(totalJourney, Math.max(0, now.getTime() - start.getTime()));
-        const progress = totalJourney > 0 ? Math.max(0, Math.min(100, (elapsed / totalJourney) * 100)) : 100;
-        $("progress-bar").style.width = progress.toFixed(2) + "%";
-        $("progress-label").textContent = progress.toFixed(1) + "% complete";
-        $("end-label").textContent = END_DATE.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+      PEOPLE.forEach((person) => {
+        const id = person.id;
 
-        if (diff === 0) {
-          $("days").textContent = "0";
-          $("hours").textContent = "00";
-          $("minutes").textContent = "00";
-          $("seconds").textContent = "00";
-          $("progress-label").textContent = "Bond end date reached";
-        }
-      }
+        // Each person has a separate joining date AND end date.
+        const joiningDate = startOfDay(person.joiningDate);
+        const endDate = startOfDay(person.endDate);
 
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
-    </script>
-  </body>
+        const calendarDays = Math.max(
+          0,
+          Math.round((endDate - today) / 86400000)
+        );
+
+        const weekdays =
+          today >= endDate ? 0 : countDays(today, endDate, false);
+
+        const weekends =
+          today >= endDate ? 0 : countDays(today, endDate, true);
+
+        const totalBondDays = Math.max(
+          1,
+          Math.round((endDate - joiningDate) / 86400000)
+        );
+
+        const elapsedDays = Math.max(
+          0,
+          Math.round((today - joiningDate) / 86400000)
+        );
+
+        const progress = Math.min(
+          100,
+          Math.max(0, (elapsedDays / totalBondDays) * 100)
+        );
+
+        $(id + "-days").textContent =
+          calendarDays.toLocaleString();
+
+        $(id + "-weekdays").textContent =
+          weekdays.toLocaleString();
+
+        $(id + "-weekends").textContent =
+          weekends.toLocaleString();
+
+        $(id + "-percent").textContent =
+          progress.toFixed(1) + "%";
+
+        $(id + "-bar").style.width =
+          progress.toFixed(2) + "%";
+      });
+    }
+
+    updateCountdowns();
+
+    // Refresh the live countdown every second.
+    setInterval(updateCountdowns, 1000);
+  </script>
+</body>
 </html>
